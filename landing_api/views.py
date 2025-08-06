@@ -7,18 +7,30 @@ from datetime import datetime
 
 class LandingAPI(APIView):
     name = "Landing API"
-    collection_name = "landing_collection"  # Cambia el nombre según tu colección en Firebase
+    collection_name = "votes"  # Cambiado para coincidir con la colección en Firebase
 
     def get(self, request):
 
       # Referencia a la colección
       ref = db.reference(f'{self.collection_name}')
 
-      # get: Obtiene todos los elementos de la col ección
+      # get: Obtiene todos los elementos de la colección
       data = ref.get()
 
+      # Si no hay datos, retorna un arreglo vacío
+      if data is None:
+          return Response([], status=status.HTTP_200_OK)
+
+      # Convierte el objeto de Firebase a un array para una respuesta más legible
+      # Incluye el ID de Firebase en cada elemento
+      result = []
+      for key, value in data.items():
+          item = value.copy()
+          item['id'] = key  # Agrega el ID de Firebase al objeto
+          result.append(item)
+
       # Devuelve un arreglo JSON
-      return Response(data, status=status.HTTP_200_OK)
+      return Response(result, status=status.HTTP_200_OK)
     
     def post(self, request):
 
